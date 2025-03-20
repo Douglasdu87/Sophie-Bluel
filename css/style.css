@@ -1,0 +1,502 @@
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+
+
+/* Conteneur des boutons */
+
+.filters {
+    display: flex; /* Active Flexbox */
+    gap: 10px; /* Espace entre les boutons */
+    justify-content: center; /* Centre horizontalement */
+    align-items: center; /* Centre verticalement */
+	margin: 30px;
+	height: 50px; 
+	
+}
+
+/* Style de base pour tous les boutons */
+.filter {
+    font-family: 'Work Sans', sans-serif; /* Police d'écriture */
+    font-size: 16px; /* Taille du texte */
+    font-weight: bold; /* Texte en gras */
+    color: #1D6154; /* Couleur du texte (vert foncé) */
+    border: 1px solid #1D6154; /* Bordure verte */
+    background-color: transparent; /* Fond transparent */
+    padding: 10px 20px; /* Espace intérieur du bouton */
+    border-radius: 30px; /* Coins arrondis */
+    cursor: pointer; /* Change le curseur pour montrer que c'est cliquable */
+    transition: all 0.3s ease-in-out; /* Animation fluide quand on survole */
+}
+
+/* Style spécifique pour le bouton actif */
+.filter.active {
+    background-color: #1D6154; /* Fond vert foncé */
+    color: white; /* Texte blanc */
+}
+
+/* Effet au survol des boutons inactifs */
+.filter:hover {
+    background-color: #1D6154; /* Fond vert foncé */
+    color: white; /* Texte blanc */
+}
+
+
+
+
+
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+/** end reset css**/
+.container {
+	max-width: 1140px;
+	margin:auto;
+	font-family: 'Work Sans' ;
+	font-size: 14px;
+}
+header {
+	display: flex;
+	justify-content: space-between;
+	margin: 50px 0
+}
+section {
+	margin: 50px 0
+}
+
+h1{
+	display: flex;
+	flex-direction: column;
+	font-family: 'Syne';
+	font-size: 22px;
+	font-weight: 800;
+	color: #B1663C
+}
+
+h1 > span {
+	font-family: 'Work Sans';
+	font-size:10px;
+	letter-spacing: 0.1em;
+;
+}
+
+h2{
+	font-family: 'Syne';
+	font-weight: 700;
+	font-size: 30px;
+	color: #1D6154
+}
+nav ul {
+	display: flex;
+	align-items: center;
+	list-style-type: none;
+
+}
+nav li {
+	padding: 0 10px;
+	font-size: 1.2em;
+}
+
+li:hover {
+	color: #B1663C;
+}
+#introduction {
+	display: flex;
+	align-items: center;
+}
+#introduction figure {
+	flex: 1
+}
+#introduction img {
+	display: block;
+	margin: auto;
+	width: 80%;
+}
+
+#introduction article {
+	flex: 1
+}
+#introduction h2 {
+	margin-bottom: 1em;
+}
+
+#introduction p {
+	margin-bottom: 0.5em;
+}
+
+#portfolio h2 {
+	text-align: center;
+	/* margin-bottom: 1em; */
+}
+.gallery {
+	width: 100%;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-column-gap: 20px;
+	grid-row-gap: 20px;
+}
+
+.gallery img {
+	width: 100%;
+
+}
+#contact {
+	width: 50%;
+margin: auto;
+}
+#contact > * {
+	text-align: center;
+
+}
+#contact h2{
+	margin-bottom: 20px;
+}
+#contact form {
+	text-align: left;
+	margin-top:30px;
+	display: flex;
+	flex-direction: column;
+}
+
+#contact input {
+	height: 50px;
+	font-size: 1.2em;
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+}
+#contact label {
+	margin: 2em 0 1em 0;
+}
+#contact textarea {
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+}
+
+input[type="submit"]{
+	font-family: 'Syne';
+	font-weight: 700;
+	color: white;
+	background-color: #1D6154;
+	margin : 2em auto ;
+	width: 180px;
+	text-align: center;
+	border-radius: 60px ;
+}
+
+footer nav ul {
+	display: flex;
+	justify-content: flex-end;
+	margin: 2em
+}
+
+
+.bandeau {
+    width: 100%;
+    background-color: black;
+    color: white;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    height: 59px;
+
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Espace entre l'icône et le texte */
+}
+
+.bandeau i {
+    font-size: 16px; /* Taille de l'icône */
+	padding: 0 10px;
+}
+
+
+
+
+/* Styles de la modale */
+.modal-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.3);
+	display: none;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+  }
+  
+  .modal {
+	background-color: white;
+	border-radius: 10px;
+	padding: 30px;
+	width: 100%;
+	max-width: 630px;
+	max-height: 90vh;
+	overflow-y: auto;
+	position: relative;
+  }
+  
+  .close-modal {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	font-size: 24px;
+	cursor: pointer;
+	color: #000;
+  }
+  
+  .modal h2 {
+	font-family: 'Work Sans', sans-serif;
+	font-size: 26px;
+	text-align: center;
+	margin-bottom: 30px;
+	color: #000;
+	font-weight: 400;
+  }
+  
+  /* Styles pour la galerie à l'intérieur de la modale */
+  .gallery-grid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 10px;
+	margin-bottom: 20px;
+  }
+  
+  .gallery-item {
+	position: relative;
+  }
+  
+  .gallery-item img {
+	width: 100%;
+	height: 104px;
+	object-fit: cover;
+  }
+  
+  .delete-icon {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	background-color: #000;
+	color: white;
+	width: 17px;
+	height: 17px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 2px;
+	cursor: pointer;
+	font-size: 11px;
+  }
+  
+  /* Séparateur pour la modale */
+  .modal-separator {
+	height: 1px;
+	width: 100%;
+	background-color: #B3B3B3;
+	margin: 20px 0;
+  }
+  
+  /* Styles pour les boutons */
+  .modal-footer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 15px;
+	margin-top: 20px;
+  }
+  
+  .fa-image {
+	font-size: 70px;
+	color: #CBD6DC;
+	margin: 12px;
+  }
+
+
+  .btn-add, .btn-validate {
+	background-color: #1D6154;
+	color: white;
+	border: none;
+	border-radius: 60px;
+	padding: 10px 35px;
+	font-family: 'Syne', sans-serif;
+	font-weight: 700;
+	cursor: pointer;
+	font-size: 14px;
+  }
+  
+  .btn-delete {
+	background-color: transparent;
+	color: #D65353;
+	border: none;
+	font-family: 'Syne', sans-serif;
+	cursor: pointer;
+	font-size: 14px;
+  }
+  
+  .btn-cancel {
+	background-color: #CBD6DC;
+	color: #306685;
+	border: none;
+	border-radius: 60px;
+	padding: 10px 35px;
+	font-family: 'Syne', sans-serif;
+	font-weight: 700;
+	cursor: pointer;
+	font-size: 14px;
+  }
+  
+  /* Styles pour la vue d'ajout de photo */
+  .modal-view {
+	display: none;
+	margin: 70px;
+  }
+  
+  #gallery-view {
+	display: block;
+  }
+  
+  .upload-container {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+  }
+  
+  .upload-preview {
+	background-color: #E8F1F6;
+	height: 169px;
+	border-radius: 3px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+  }
+  
+  #preview-icon {
+	width: 58px;
+	height: 58px;
+	margin-bottom: 15px;
+  }
+  
+  .file-label {
+	background-color: #CBD6DC;
+	border-radius: 50px;
+	padding: 10px 20px;
+	color: #306685;
+	font-weight: 500;
+	font-size: 14px;
+	cursor: pointer;
+	margin-bottom: 7px;
+  }
+  
+  #file-upload {
+	display: none;
+  }
+  
+  .upload-info {
+	color: #444;
+	font-size: 10px;
+  }
+  
+  #image-preview {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+  }
+  
+  .form-group {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 15px;
+  }
+  
+  .form-group label {
+	color: #3D3D3D;
+	margin-bottom: 10px;
+	font-size: 14px;
+  }
+  
+  .form-group input, .form-group select {
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	height: 51px;
+	padding: 0 15px;
+	font-size: 14px;
+  }
+  
+  /* Styles pour le bouton d'édition */
+  .edit-button-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 30px;
+	
+  }
+  
+  .edit-button {
+	background: none;
+	border: none;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	font-size: 14px;
+	padding: 0 15px;
+	/* margin-bottom: 29px; */
+  }
+  
+  .edit-button i {
+	margin-right: 5px;
+
+  }
