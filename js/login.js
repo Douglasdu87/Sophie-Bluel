@@ -16,7 +16,11 @@ baliseButton.addEventListener("click", async function loginclick(event) {
             headers: {
                 "content-type": "application/json", // Définit le type de contenu
             },
+<<<<<<< HEAD
             body: JSON.stringify({ // Convertit les données en JSON &&
+=======
+            body: JSON.stringify({ // Convertit les données en JSON &
+>>>>>>> 95af9d51e8ad4d289965eefd96b4ce98f1a1dae1
                 email: baliseEmail.value, // Récupère la valeur de l'email
                 password: balisePassword.value, // Récupère le mot de passe
             }),
