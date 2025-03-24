@@ -33,8 +33,8 @@
 <div class="modal-container" id="modal-gallery">
 	<div class="modal">
 	  <span class="close-modal">&times;</span>
-	  <i class="fa-solid fa-arrow-left"></i>
-
+	  <i class="fa-solid fa-arrow-left" id="fleche-gauche"></i>
+		
 	  <!-- Vue Galerie Photo -->
 	  <div class="modal-view" id="gallery-view">
 		<h2>Galerie photo</h2>
@@ -56,19 +56,19 @@
 			<div class="upload-preview" id="preview-container">
 				<i class="fa-regular fa-image"></i>
 			  <label for="file-upload" class="file-label">+ Ajouter photo</label>
-			  <input type="file" id="file-upload" name="image" accept="image/*" required>
+			  <input type="file" id="file-upload" name="image" accept="image/*">
 			  <p class="upload-info">jpg, png : 4mo max</p>
 			  <img id="image-preview" src="" alt="Aperçu de l'image">
 			</div>
 			
 			<div class="form-group">
 			  <label for="title">Titre</label>
-			  <input type="text" name="title" id="title" required>
+			  <input type="text" name="title" id="title">
 			</div>
 			
 			<div class="form-group">
 			  <label for="category">Catégorie</label>
-			  <select name="category" id="category" required>
+			  <select name="category" id="category">
 				<!-- Les catégories seront générées dynamiquement -->
 			  </select>
 			</div>

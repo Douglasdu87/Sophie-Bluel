@@ -1,8 +1,11 @@
 const API_WORK = "http://localhost:5678/api/works";
-const categoriesContainer = document.querySelector(".filters"); 
+const categoriesContainer = document.querySelector(".filters");
 const worksContainer = document.getElementById("gallery");
 
-// Fonction pour récupérer les travaux depuis l’API
+// Variable pour éviter les initialisations multiples
+let isInitialized = false;
+
+// Fonction pour récupérer les travaux depuis l'API
 async function getWork() {
     try {
         const response = await fetch(API_WORK);
@@ -17,13 +20,12 @@ async function getWork() {
     }
 }
 
-
-
-
-window.onload = function() {
+window.onload = function () {
     // Récupération des éléments HTML
     const loginButton = document.getElementById("login");
     const filtersContainer = document.querySelector(".filters");
+    const modifBtn = document.querySelector(".edit-button");
+    const bandeau = document.querySelector(".bandeau");
 
     // Vérification que les éléments existent
     if (!loginButton) {
@@ -38,18 +40,17 @@ window.onload = function() {
     // Fonction pour mettre à jour l'interface selon la présence d'un token
     function updateUI() {
         const token = localStorage.getItem("Token");
-        const modifBtn = document.querySelector(".edit-button");
-        const bandeau = document.querySelector(".bandeau");
         console.log("Mise à jour de l'UI, token :", token);
         if (token) {
-            modifBtn.style.display = "flex";
+            if (modifBtn) modifBtn.style.display = "flex";
             loginButton.textContent = "logout";
             filtersContainer.style.display = "none";
+            if (bandeau) bandeau.style.display = "flex";
         } else {
             loginButton.textContent = "login";
             filtersContainer.style.display = "flex";
-            modifBtn.style.display = "none";
-            bandeau.style.display = "none";
+            if (modifBtn) modifBtn.style.display = "none";
+            if (bandeau) bandeau.style.display = "none";
         }
     }
 
@@ -57,28 +58,28 @@ window.onload = function() {
     updateUI();
 
     // Ajout de l'écouteur d'événement sur le bouton
-    loginButton.addEventListener("click", function(event) {
+    loginButton.addEventListener("click", function (event) {
         event.preventDefault(); // Empêche le comportement par défaut
-        const token = localStorage.getItem("Token");
 
         if (loginButton.innerText === "login") {
-            // Si l'utilisateur est connecté, le clic déclenche la déconnexion
-            window.location.href = "./login.html"
-            console.log("Déconnexion : token supprimé.");
+            // Redirection vers la page de connexion
+            window.location.href = "./login.html";
         } else {
-            // Sinon, simuler une connexion en stockant un token fictif
+            // Déconnexion : suppression du token
             localStorage.removeItem("Token");
-            console.log("Connexion simulée : token enregistré.");
+            console.log("Déconnexion : token supprimé.");
+            updateUI(); // Mettre à jour l'interface après l'action
         }
-        updateUI(); // Mettre à jour l'interface après l'action
     });
 };
 
-
-
 async function generateCategoriesMenu(works) {
     if (!works || works.length === 0) return;
-
+    if (!categoriesContainer) {
+        console.error("Le conteneur des catégories est introuvable.");
+        return;
+    }
+    
     // Supprimer l'affichage précédent
     categoriesContainer.innerHTML = "";
 
@@ -90,7 +91,7 @@ async function generateCategoriesMenu(works) {
     categoriesContainer.appendChild(allButton);
 
     // Extraire les catégories uniques et les ajouter
-    const categories = new Set(works.map(work => work.category ? work.category.name : "catégory"));
+    const categories = new Set(works.map(work => work.category ? work.category.name : "catégorie"));
     
     categories.forEach(category => {
         const button = document.createElement("button");
@@ -101,216 +102,239 @@ async function generateCategoriesMenu(works) {
     });
 }
 
-// Définit une fonction pour créer les filtres de catégorie
-function createFilters(categories) {
-    // Sélectionne le conteneur HTML des filtres
-    const container = document.querySelector(".category");
-    // Vide le contenu existant du conteneur
-    container.innerHTML = "";
+// Fonction pour gérer le clic sur une catégorie et mettre à jour le style actif
+function handleCategoryClick(event, category, works) {
+    // Désactiver tous les boutons
+    document.querySelectorAll(".filter").forEach(btn => btn.classList.remove("active"));
 
-    // Crée un bouton "Tous"
-    const allButton = document.createAttributelement("button"); 
-    allButton.textContent = "Tous"; // Texte du bouton
-    allButton.classList.add("active"); // Ajoute la classe active par défaut
+    // Activer uniquement le bouton cliqué
+    event.target.classList.add("active");
 
-    // Ajoute un événement au clic sur "Tous" (syntaxe à corriger)
-    allButton.addEventListener("click"), function() { 
-        // Supprime la classe 'active' de tous les boutons
-        document.querySelectorAll(".category button") 
-            .forEach((lien) => lien.classList.remove("active"));
-        
-        allButton.classList.add("active"); // Active le bouton "Tous"
-        displayFilterWorks(allworks); // Affiche tous les projets
-    };
-
-    // Ajoute le bouton "Tous" au conteneur
-    container.appendChild(allButton);
-
-    // Pour chaque catégorie reçue en paramètre
-    categories.forEach((category) => {
-        // Crée un bouton de catégorie
-        const lienCatery = document.createElement("button");
-        lienCatery.textContent = category.name; // Nom de la catégorie
-
-        // Ajoute un événement au clic
-        lienCatery.addEventListener("click", function() {
-            // Désactive tous les boutons
-            document.querySelectorAll(".category button") // 
-                .forEach((lien) => {
-                    lien.classList.remove("active");
-                });
-            
-            lienCatery.classList.add("active"); // Active le bouton cliqué
-            filterCategory.classList.add(category.id); 
-        });
-
-        // Ajoute le bouton au conteneur
-        container.appendChild(lienCatery);
-    });
-
-}
-
-
-// Définit une fonction pour filtrer les travaux par catégorie
-function filterCategory(categoryId) {
-    // Filtre le tableau global allworks
-    const filteredWorks = allworks.filter((work) => {
-        // Affiche une comparaison debug dans la console
-        console.log(`comparaison ${work.categoryId} === ${categoryId}`);
-        // Retourne true si la catégorie correspond
-        return work.categoryId == categoryId;
-    });
-    // Affiche le résultat du filtrage dans la console
-    console.log("Résultat filtré : ", filteredWorks);
-    // Appelle la fonction d'affichage avec les travaux filtrés
+    // Filtrer et afficher les travaux
+    const filteredWorks = category === "Tous" ? works : works.filter(work => work.category && work.category.name === category);
     displayWorks(filteredWorks);
 }
 
-// Définit une fonction pour afficher les travaux filtrés
-function displayFilterWorks(filteredWorks) {
-    // Sélectionne le conteneur de la galerie
-    const container = document.querySelector(".gallery");
-    // Vide complètement la galerie
-    container.innerHTML = "";
-
-    // Vérifie si le tableau est vide 
-    if (filteredWorks.lenght === 0) {
-        // Message debug si aucun travail
-        console.log("les works ne sont encore chargés");
-        return; // Sortie anticipée
+// Fonction pour afficher les travaux
+function displayWorks(works) {
+    if (!worksContainer) {
+        console.error("Le conteneur de la galerie est introuvable.");
+        return;
     }
+    
+    worksContainer.innerHTML = ""; // Vider l'affichage actuel
 
-    // Pour chaque élément dans les travaux filtrés
-    filteredWorks.forEach((work) => {
-        // Crée un élément figure HTML
-        const figure = document.createElement("figure");
-        // Ajoute une classe CSS
-        figure.className = "work";
-        // Injection HTML avec les données 
-        figure.innerHTML = `<img scr="${work.imageUrl}" alt="${work.title}" />
-                          <figcaption>${work.title}</figcaption>`;
-        // Ajoute le figure à la galerie
-        container.appendChild(figure);
+    // Pour chaque élément dans le tableau 'works', exécute la fonction suivante
+    works.forEach(work => {
+        // Crée un élément HTML <figure> pour représenter un travail
+        const workElement = document.createElement("figure");
+
+        // Injecte du HTML dans l'élément figure
+        workElement.innerHTML = `
+            <img src="${work.imageUrl}" alt="${work.title}">
+            <h3>${work.title}</h3>
+        `;
+
+        // Ajoute l'élément figure créé au conteneur de la galerie
+        worksContainer.appendChild(workElement);
     });
 }
 
-
-
-// // Fonction pour gérer le clic sur une catégorie et mettre à jour le style actif
- function handleCategoryClick(event, category, works) {
-     // Désactiver tous les boutons
-     document.querySelectorAll(".filter").forEach(btn => btn.classList.remove("active"));
-
-//     // Activer uniquement le bouton cliqué
-     event.target.classList.add("active");
-
-//     // Filtrer et afficher les travaux
-     const filteredWorks = category === "Tous" ? works : works.filter(work => work.category.name === category);
-     console.log(works)
-     console.log(category)
-     console.log(filteredWorks)
-     displayWorks(filteredWorks);
- }
-
-
-// // Fonction pour afficher les travaux
-function displayWorks(works) {
-     worksContainer.innerHTML = ""; // Vider l'affichage actuel
-
-     
-// Pour chaque élément dans le tableau 'works', exécute la fonction suivante
-works.forEach(work => {
-    // Crée un élément HTML <figure> pour représenter un travail
-    const workElement = document.createElement("figure");
-    
-    // Injecte du HTML dans l'élément figure avec 
-   
-    workElement.innerHTML = `
-        <img src="${work.imageUrl}" alt="${work.title}">
-        <h3>${work.title}</h3>
-    `;
-    
-    // Ajoute l'élément figure créé au conteneur de la galerie
-    worksContainer.appendChild(workElement);
-});
-
- }
-
-// Initialisation
+// Initialisation principale
 async function init() {
+    if (isInitialized) {
+        console.log("Initialisation déjà effectuée, actualisation uniquement");
+        refreshWorks();
+        return;
+    }
+
+    isInitialized = true;
+    console.log("Initialisation complète");
+    
     const allGallery = await getWork();
-    // createGallery(allGallery);
-    displayWorks(allGallery)
+    displayWorks(allGallery);
     generateCategoriesMenu(allGallery);
+    initModalEvents();
 }
 
-        
+// Fonction de rafraîchissement des travaux sans réinitialiser toute l'interface
+async function refreshWorks() {
+    console.log("Rafraîchissement des travaux");
+    const allGallery = await getWork();
+    displayWorks(allGallery);
+    
+    // Si on est dans la modale, rafraîchir aussi l'affichage de la modale
+    const modalWorksContainer = document.getElementById("modal-works-container");
+    if (modalWorksContainer && modalWorksContainer.offsetParent !== null) {
+        loadWorksInModal();
+    }
+}
+
 // Initialiser les événements de la modale
-initModalEvents();
-
-
-// Fonction pour initialiser les événements de la modale
 function initModalEvents() {
-// Éléments de la modale
-const modal = document.getElementById("modal-gallery");
-const closeButton = document.querySelector(".close-modal");
-const editButton = document.getElementById("edit-gallery-button");
-const addPhotoButton = document.getElementById("add-photo-button");
-const fileUpload = document.getElementById("file-upload");
-const imagePreview = document.getElementById("image-preview");
-const fileLabel = document.querySelector(".file-label");
-const uploadInfo = document.querySelector(".upload-info");
-const addPhotoForm = document.getElementById("add-photo-form");
-const deleteGalleryButton = document.getElementById("delete-gallery");
-const confirmDeleteView = document.getElementById("confirm-delete-view");
-const cancelDeleteButton = document.getElementById("cancel-delete");
-const confirmDeleteButton = document.getElementById("confirm-delete");
-const galleryView = document.getElementById("gallery-view");
-const addPhotoView = document.getElementById("add-photo-view");
-
-
-
-// Ouvrir la modale
-editButton.addEventListener("click", function() {
-    modal.style.display = "flex";
-    showGalleryView();
-    loadWorksInModal();
-    loadCategories();
-});
-
-// Fermer la modale
-closeButton.addEventListener("click", closeModal);
-
-// Fermer la modale en cliquant en dehors
-modal.addEventListener("click", function(event) {
-    if (event.target === modal) {
-        closeModal();
+    // Récupération des éléments DOM
+    const elements = getModalElements();
+    
+    // Si certains éléments essentiels sont manquants, on sort de la fonction
+    if (!elements.modal || !elements.editButton) {
+        console.log("Certains éléments de la modale sont introuvables.");
+        return;
     }
-});
+    
+    // Configuration des événements de navigation et d'interface
+    setupModalNavigation(elements);
+    
+    // Configuration des événements de prévisualisation d'image
+    setupImagePreview(elements);
+    
+    // Configuration du formulaire d'ajout de photo
+    setupPhotoForm(elements);
+    
+    // Configuration des événements de suppression
+    setupDeleteHandlers(elements);
+}
 
-// Navigation entre les vues
-addPhotoButton.addEventListener("click", function() {
-    showAddPhotoView();
-});
+// Récupération de tous les éléments DOM nécessaires
+function getModalElements() {
+    return {
+        modal: document.getElementById("modal-gallery"),
+        closeButton: document.querySelector(".close-modal"),
+        editButton: document.getElementById("edit-gallery-button"),
+        addPhotoButton: document.getElementById("add-photo-button"),
+        fileUpload: document.getElementById("file-upload"),
+        imagePreview: document.getElementById("image-preview"),
+        fileLabel: document.querySelector(".file-label"),
+        uploadInfo: document.querySelector(".upload-info"),
+        addPhotoForm: document.getElementById("add-photo-form"),
+        confirmDeleteView: document.getElementById("confirm-delete-view"),
+        cancelDeleteButton: document.getElementById("cancel-delete"),
+        confirmDeleteButton: document.getElementById("confirm-delete"),
+        galleryView: document.getElementById("gallery-view"),
+        addPhotoView: document.getElementById("add-photo-view"),
+        flecheGauche: document.getElementById("fleche-gauche"),
+        title: document.getElementById("title"),
+        category: document.getElementById("category"),
+        validateBtn: document.querySelector('button[type="submit"]')
+    };
+}
 
-// Prévisualisation de l'image uploadée
-fileUpload.addEventListener("change", function() {
-    const file = this.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            imagePreview.src = e.target.result;
-            imagePreview.style.display = "block";
-            fileLabel.style.display = "none";
-            uploadInfo.style.display = "none";
-        };
-        reader.readAsDataURL(file);
+// Configuration des événements de navigation entre les vues
+function setupModalNavigation(elements) {
+    const { modal, closeButton, editButton, addPhotoButton, galleryView, 
+            addPhotoView, flecheGauche } = elements;
+    
+    // Vérifier si les éléments existent avant d'ajouter des événements
+    if (!modal || !editButton) return;
+    
+    // Ouvrir la modale
+    if (editButton) {
+        editButton.addEventListener("click", function() {
+            modal.style.display = "flex";
+            showGalleryView(elements);
+            loadWorksInModal();
+            loadCategories();
+            if (flecheGauche) flecheGauche.style.display = "none";
+        });
     }
-});
+    
+    // Retour à la galerie depuis l'ajout de photo
+    if (flecheGauche && galleryView && addPhotoView) {
+        flecheGauche.addEventListener("click", function() {
+            addPhotoView.style.display = "none";
+            galleryView.style.display = "flex";
+            galleryView.style.flexDirection = "column";
+        });
+    }
+    
+    // Fermer la modale
+    if (closeButton) {
+        closeButton.addEventListener("click", function() {
+            closeModal(elements);
+        });
+    }
+    
+    // Fermer la modale en cliquant en dehors
+    modal.addEventListener("click", function(event) {
+        if (event.target === modal) {
+            closeModal(elements);
+        }
+    });
+    
+    // Navigation vers l'ajout de photo
+    if (addPhotoButton && flecheGauche) {
+        addPhotoButton.addEventListener("click", function() {
+            showAddPhotoView(elements);
+            flecheGauche.style.display = "flex";
+        });
+    }
+}
 
-// Soumission du formulaire d'ajout de photo
-addPhotoForm.addEventListener("submit", function(event) {
-    event.preventDefault();
+// Configuration de la prévisualisation d'image
+function setupImagePreview(elements) {
+    const { fileUpload, imagePreview, fileLabel, uploadInfo } = elements;
+    
+    if (!fileUpload || !imagePreview) return;
+    
+    fileUpload.addEventListener("change", function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = "block";
+                if (fileLabel) fileLabel.style.display = "none";
+                if (uploadInfo) uploadInfo.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Configuration du formulaire d'ajout de photo
+function setupPhotoForm(elements) {
+    const { fileUpload, title, category, validateBtn, addPhotoForm } = elements;
+    
+    if (!fileUpload || !title || !category || !validateBtn || !addPhotoForm) return;
+    
+    // Désactiver le bouton de validation par défaut
+    validateBtn.disabled = true;
+    
+    // Ajouter les écouteurs d'événements pour la validation
+    fileUpload.addEventListener("change", () => validateForm(elements));
+    title.addEventListener("input", () => validateForm(elements));
+    category.addEventListener("change", () => validateForm(elements));
+    
+    // Gérer la soumission du formulaire
+    addPhotoForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        submitPhotoForm(elements);
+    });
+}
+
+// Validation du formulaire
+function validateForm(elements) {
+    const { fileUpload, title, category, validateBtn } = elements;
+    
+    if (!fileUpload || !title || !category || !validateBtn) return false;
+    
+    const hasFile = fileUpload.files.length > 0;
+    const hasTitle = title.value.trim() !== "";
+    const hasCategory = category.value !== "";
+    
+    // Activer ou désactiver le bouton selon la validité
+    validateBtn.disabled = !(hasFile && hasTitle && hasCategory);
+    
+    return hasFile && hasTitle && hasCategory;
+}
+
+// Fonction pour soumettre le formulaire d'ajout de photo
+function submitPhotoForm(elements) {
+    const { fileUpload, title, category, addPhotoForm } = elements;
+    
+    if (!fileUpload || !title || !category || !addPhotoForm) {
+        console.error("Éléments du formulaire manquants");
+        return;
+    }
     
     const token = localStorage.getItem("Token");
     if (!token) {
@@ -318,11 +342,17 @@ addPhotoForm.addEventListener("submit", function(event) {
         return;
     }
     
+    // Vérifier si le formulaire est valide
+    if (!validateForm(elements)) {
+        alert("Veuillez remplir tous les champs obligatoires.");
+        return;
+    }
+    
     const formData = new FormData();
     formData.append("image", fileUpload.files[0]);
-    formData.append("title", document.getElementById("title").value);
-    formData.append("category", document.getElementById("category").value);
-    
+    formData.append("title", title.value);
+    formData.append("category", category.value);
+
     // Envoyer les données à l'API
     fetch(API_WORK, {
         method: "POST",
@@ -340,14 +370,13 @@ addPhotoForm.addEventListener("submit", function(event) {
     .then(data => {
         // Réinitialiser le formulaire
         addPhotoForm.reset();
-        resetPreview();
+        resetPreview(elements);
         
         // Revenir à la vue galerie et recharger
-        showGalleryView();
-        loadWorksInModal();
+        showGalleryView(elements);
         
-        // Rafraîchir la galerie principale
-        init();
+        // Rafraîchir uniquement les travaux, pas toute l'interface
+        refreshWorks();
         
         // Confirmation à l'utilisateur
         alert("Photo ajoutée avec succès !");
@@ -356,157 +385,190 @@ addPhotoForm.addEventListener("submit", function(event) {
         console.error("Erreur:", error);
         alert("Une erreur est survenue lors de l'ajout de la photo.");
     });
-});
-
-// Gestion de la suppression d'une œuvre
-document.addEventListener("click", function(event) {
-    if (event.target.classList.contains("delete-icon") || event.target.closest(".delete-icon")) {
-        const workId = event.target.closest(".gallery-item").dataset.id;
-        deleteWork(workId);
-    }
-});
-
-
-// Annuler la suppression de la galerie
-cancelDeleteButton.addEventListener("click", function() {
-    confirmDeleteView.style.display = "none";
-    galleryView.style.display = "block";
-});
-
-// Confirmer la suppression de la galerie
-confirmDeleteButton.addEventListener("click", function() {
-    deleteAllWorks();
-});
 }
 
-// Fonction pour charger les œuvres dans la modale
+// Configurer les gestionnaires d'événements de suppression
+function setupDeleteHandlers(elements) {
+    const { confirmDeleteButton, cancelDeleteButton, galleryView, confirmDeleteView } = elements;
+    
+    if (!confirmDeleteButton || !cancelDeleteButton) return;
+    
+    // Gestion de la suppression d'une œuvre (une seule fois)
+    document.removeEventListener("click", handleDeleteClick); // Supprimer l'ancien gestionnaire s'il existe
+    document.addEventListener("click", handleDeleteClick);
+    
+    // Annuler la suppression de la galerie
+    if (cancelDeleteButton && confirmDeleteView && galleryView) {
+        cancelDeleteButton.addEventListener("click", function() {
+            confirmDeleteView.style.display = "none";
+            galleryView.style.display = "block";
+        });
+    }
+    
+    // Confirmer la suppression de la galerie
+    if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener("click", function() {
+            deleteAllWorks();
+        });
+    }
+}
+
+// Gestionnaire de clic pour la suppression (défini séparément pour pouvoir le supprimer)
+function handleDeleteClick(event) {
+    const deleteIcon = event.target.classList.contains("delete-icon") ? 
+                       event.target : 
+                       event.target.closest(".delete-icon");
+                       
+    if (deleteIcon) {
+        const galleryItem = deleteIcon.closest(".gallery-item");
+        if (galleryItem && galleryItem.dataset.id) {
+            deleteWork(galleryItem.dataset.id);
+        }
+    }
+}
+
+// Fonction pour supprimer toutes les œuvres
+function deleteAllWorks() {
+    alert("Fonctionnalité de suppression globale non implémentée");
+    // Cette fonction devrait être implémentée si nécessaire
+}
+
+// Afficher la vue galerie
+function showGalleryView(elements) {
+    const { galleryView, addPhotoView, confirmDeleteView } = elements;
+    
+    if (!galleryView) return;
+    
+    galleryView.style.display = "block";
+    if (addPhotoView) addPhotoView.style.display = "none";
+    if (confirmDeleteView) confirmDeleteView.style.display = "none";
+}
+
+// Afficher la vue d'ajout de photo
+function showAddPhotoView(elements) {
+    const { galleryView, addPhotoView, confirmDeleteView } = elements;
+    
+    if (!addPhotoView) return;
+    
+    if (galleryView) galleryView.style.display = "none";
+    addPhotoView.style.display = "block";
+    if (confirmDeleteView) confirmDeleteView.style.display = "none";
+    resetPreview(elements);
+}
+
+// Réinitialiser la prévisualisation d'image
+function resetPreview(elements) {
+    const { imagePreview, fileLabel, uploadInfo } = elements;
+    
+    if (!imagePreview) return;
+    
+    imagePreview.style.display = "none";
+    if (fileLabel) fileLabel.style.display = "block";
+    if (uploadInfo) uploadInfo.style.display = "block";
+}
+
+// Fermer la modale
+function closeModal(elements) {
+    const { modal, addPhotoForm } = elements;
+    
+    if (!modal) return;
+    
+    modal.style.display = "none";
+    if (addPhotoForm) addPhotoForm.reset();
+    resetPreview(elements);
+}
+
+// Fonction pour charger les images dans la modale
 async function loadWorksInModal() {
-const works = await getWork();
-const modalWorksContainer = document.getElementById("modal-works-container");
+    const works = await getWork();
+    const modalWorksContainer = document.getElementById("modal-works-container");
 
-modalWorksContainer.innerHTML = "";
+    if (!modalWorksContainer) {
+        console.error("Le conteneur des travaux dans la modale est introuvable.");
+        return;
+    }
 
-works.forEach(work => {
-    const galleryItem = document.createElement("div");
-    galleryItem.className = "gallery-item";
-    galleryItem.dataset.id = work.id;
-    
-    galleryItem.innerHTML = `
-        <img src="${work.imageUrl}" alt="${work.title}">
-        <div class="delete-icon">
-            <i class="fa-solid fa-trash-can"></i>
-        </div>
-    `;
-    
-    modalWorksContainer.appendChild(galleryItem);
-});
+    modalWorksContainer.innerHTML = "";
+
+    works.forEach(work => {
+        const galleryItem = document.createElement("div");
+        galleryItem.className = "gallery-item";
+        galleryItem.dataset.id = work.id;
+
+        galleryItem.innerHTML = `
+            <img src="${work.imageUrl}" alt="${work.title}">
+            <div class="delete-icon">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+        `;
+
+        modalWorksContainer.appendChild(galleryItem);
+    });
 }
 
 // Fonction pour charger les catégories dans le formulaire
 async function loadCategories() {
-try {
-    const response = await fetch("http://localhost:5678/api/categories");
-    if (!response.ok) {
-        throw new Error("Erreur lors du chargement des catégories");
+    try {
+        const response = await fetch("http://localhost:5678/api/categories");
+        if (!response.ok) {
+            throw new Error("Erreur lors du chargement des catégories");
+        }
+
+        const categories = await response.json();
+        const categorySelect = document.getElementById("category");
+
+        if (!categorySelect) {
+            console.error("Le sélecteur de catégories est introuvable.");
+            return;
+        }
+
+        categorySelect.innerHTML = '<option value="" disabled selected>Sélectionner une catégorie</option>';
+
+        categories.forEach(category => {
+            const option = document.createElement("option");
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Erreur:", error);
     }
-    
-    const categories = await response.json();
-    const categorySelect = document.getElementById("category");
-    
-    categorySelect.innerHTML = '<option value="" disabled selected>Sélectionner une catégorie</option>';
-    
-    categories.forEach(category => {
-        const option = document.createElement("option");
-        option.value = category.id;
-        option.textContent = category.name;
-        categorySelect.appendChild(option);
-    });
-} catch (error) {
-    console.error("Erreur:", error);
-}
 }
 
 // Fonction pour supprimer une œuvre
 async function deleteWork(workId) {
-const token = localStorage.getItem("Token");
-if (!token) {
-    alert("Vous devez être connecté pour supprimer une œuvre.");
-    return;
-}
+    const token = localStorage.getItem("Token");
+    if (!token) {
+        alert("Vous devez être connecté pour supprimer une œuvre.");
+        return;
+    }
 
-if (confirm("Êtes-vous sûr de vouloir supprimer cette œuvre ?")) {
-    try {
-        const response = await fetch(`${API_WORK}/${workId}`, {
-            method: "DELETE",
-            headers: {
-                "Authorization": `Bearer ${token}`
+    if (confirm("Êtes-vous sûr de vouloir supprimer cette œuvre ?")) {
+        try {
+            const response = await fetch(`${API_WORK}/${workId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Erreur lors de la suppression");
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error("Erreur lors de la suppression");
+
+            // Rafraîchir uniquement les travaux, pas toute l'interface
+            refreshWorks();
+
+            // Confirmation à l'utilisateur
+            alert("Œuvre supprimée avec succès !");
+        } catch (error) {
+            console.error("Erreur:", error);
+            alert("Une erreur est survenue lors de la suppression.");
         }
-        
-        // Rafraîchir l'affichage dans la modale
-        loadWorksInModal();
-        
-        // Rafraîchir la galerie principale
-        init();
-        
-        // Confirmation à l'utilisateur
-        alert("Œuvre supprimée avec succès !");
-    } catch (error) {
-        console.error("Erreur:", error);
-        alert("Une erreur est survenue lors de la suppression.");
     }
 }
-}
 
-
-// Fonctions auxiliaires
-function showGalleryView() {
-document.getElementById("gallery-view").style.display = "block";
-document.getElementById("add-photo-view").style.display = "none";
-document.getElementById("confirm-delete-view").style.display = "none";
-}
-
-function showAddPhotoView() {
-document.getElementById("gallery-view").style.display = "none";
-document.getElementById("add-photo-view").style.display = "block";
-document.getElementById("confirm-delete-view").style.display = "none";
-resetPreview();
-}
-
-function resetPreview() {
-const imagePreview = document.getElementById("image-preview");
-const fileLabel = document.querySelector(".file-label");
-const uploadInfo = document.querySelector(".upload-info");
-
-imagePreview.style.display = "none";
-fileLabel.style.display = "block";
-uploadInfo.style.display = "block";
-}
-
-function closeModal() {
-document.getElementById("modal-gallery").style.display = "none";
-document.getElementById("add-photo-form").reset();
-resetPreview();
-}
-
-// Initialiser l'interface admin au chargement de la page
-document.addEventListener("DOMContentLoaded", function() {
-// Vérifier si l'utilisateur est connecté
-const token = localStorage.getItem("Token");
-if (token) {
+// Initialiser l'interface au chargement de la page (une seule fois)
+document.addEventListener("DOMContentLoaded", function () {
     init();
-}
 });
-
-
-
-
-
-
-
-
-init();
