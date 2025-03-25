@@ -211,19 +211,11 @@ button:hover {
 }
 
 
-
-
 /* Correction de l'espacement global */
  body {
     min-height: 50vh; /* Garantit la hauteur totale */
     padding-bottom: 20px; /* Espace en bas */
  } 
-
-
-
-
-
-
 
 
 .footer {

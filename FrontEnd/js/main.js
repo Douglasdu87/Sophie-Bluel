@@ -128,6 +128,7 @@ function displayWorks(works) {
     works.forEach(work => {
         // Crée un élément HTML <figure> pour représenter un travail
         const workElement = document.createElement("figure");
+        workElement.dataset.id = work.id;
 
         // Injecte du HTML dans l'élément figure
         workElement.innerHTML = `
@@ -243,7 +244,9 @@ function setupModalNavigation(elements) {
             addPhotoView.style.display = "none";
             galleryView.style.display = "flex";
             galleryView.style.flexDirection = "column";
+        flecheGauche.style.display = "none";
         });
+
     }
     
     // Fermer la modale
