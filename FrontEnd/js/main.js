@@ -90,10 +90,18 @@ async function generateCategoriesMenu(works) {
     allButton.addEventListener("click", (event) => handleCategoryClick(event, "Tous", works));
     categoriesContainer.appendChild(allButton);
 
-    // Extraire les catégories uniques et les ajouter
-    const categories = new Set(works.map(work => work.category ? work.category.name : "catégorie"));
     
-    categories.forEach(category => {
+    // Extraire les catégories uniques et les ajouter
+    const uniqueCategories = new Set();
+    works.forEach(work => {
+        if (work.category && work.category.name) {
+            uniqueCategories.add(work.category.name);
+        }
+    });
+
+    
+    // Convertir le Set en Array pour pouvoir itérer dessus
+    Array.from(uniqueCategories).forEach(category => {
         const button = document.createElement("button");
         button.textContent = category;
         button.classList.add("filter"); // Ajout de la classe CSS filter
@@ -102,7 +110,8 @@ async function generateCategoriesMenu(works) {
     });
 }
 
-// Fonction pour gérer le clic sur une catégorie et mettre à jour le style actif
+
+//Fonction modifiée pour filtrer correctement par visibilité
 function handleCategoryClick(event, category, works) {
     // Désactiver tous les boutons
     document.querySelectorAll(".filter").forEach(btn => btn.classList.remove("active"));
@@ -110,38 +119,64 @@ function handleCategoryClick(event, category, works) {
     // Activer uniquement le bouton cliqué
     event.target.classList.add("active");
 
-    // Filtrer et afficher les travaux
-    const filteredWorks = category === "Tous" ? works : works.filter(work => work.category && work.category.name === category);
-    displayWorks(filteredWorks);
+    // Sélectionner tous les éléments de la galerie
+    const allWorkElements = worksContainer.querySelectorAll("figure");
+    
+    // Pour chaque élément, définir sa visibilité en fonction de la catégorie
+    allWorkElements.forEach(element => {
+        const elementCategory = element.dataset.category;
+        
+        if (category === "Tous") {
+            // Si "Tous" est sélectionné, afficher tous les éléments
+            element.style.display = "block";
+        } else if (elementCategory === category) {
+            // Si la catégorie correspond, afficher l'élément
+            element.style.display = "block";
+        } else {
+            // Sinon, masquer l'élément
+            element.style.display = "none";
+        }
+    });
+
 }
 
-// Fonction pour afficher les travaux
+
+
+// Fonction pour afficher les travaux - avec correction pour l'attribut dataset.category
 function displayWorks(works) {
     if (!worksContainer) {
         console.error("Le conteneur de la galerie est introuvable.");
         return;
     }
     
-    worksContainer.innerHTML = ""; // Vider l'affichage actuel
+    // Vider la galerie une seule fois
+    worksContainer.innerHTML = ""; 
 
-    // Pour chaque élément dans le tableau 'works', exécute la fonction suivante
+    // Créer tous les éléments une seule fois
     works.forEach(work => {
-        // Crée un élément HTML <figure> pour représenter un travail
         const workElement = document.createElement("figure");
         workElement.dataset.id = work.id;
-
-        // Injecte du HTML dans l'élément figure
+        
+        // S'assurer que la catégorie est correctement stockée
+        if (work.category && work.category.name) {
+            workElement.dataset.category = work.category.name;
+        } else {
+            workElement.dataset.category = "";
+        }
+        
         workElement.innerHTML = `
             <img src="${work.imageUrl}" alt="${work.title}">
             <h3>${work.title}</h3>
         `;
-
-        // Ajoute l'élément figure créé au conteneur de la galerie
+        
+        // Ajouter l'élément au conteneur
         worksContainer.appendChild(workElement);
     });
 }
 
-// Initialisation principale
+
+
+/// Initialisation principale - modifiée pour appeler l'API une seule fois
 async function init() {
     if (isInitialized) {
         console.log("Initialisation déjà effectuée, actualisation uniquement");
@@ -149,26 +184,55 @@ async function init() {
         return;
     }
 
+    
     isInitialized = true;
     console.log("Initialisation complète");
     
+    // Appel unique à l'API pour récupérer tous les travaux
     const allGallery = await getWork();
+    
+    // Afficher tous les travaux
     displayWorks(allGallery);
+    
+    // Générer le menu des catégories avec les mêmes données
     generateCategoriesMenu(allGallery);
+    
+    // Initialiser les événements de la modale
     initModalEvents();
 }
+
+
+
 
 // Fonction de rafraîchissement des travaux sans réinitialiser toute l'interface
 async function refreshWorks() {
     console.log("Rafraîchissement des travaux");
     const allGallery = await getWork();
+
+    // Sauvegarder la catégorie active actuelle
+    const activeCategory = document.querySelector(".filter.active")?.textContent || "Tous";
+      
+    // Réafficher tous les travaux  
     displayWorks(allGallery);
+
+
     
+    /// Réappliquer le filtre actif
+    const allWorkElements = worksContainer.querySelectorAll("figure");
+    allWorkElements.forEach(element => {
+        if (activeCategory === "Tous" || element.dataset.category === activeCategory) {
+            element.style.display = "block";
+        } else {
+            element.style.display = "none";
+        }
+    });
+
     // Si on est dans la modale, rafraîchir aussi l'affichage de la modale
     const modalWorksContainer = document.getElementById("modal-works-container");
     if (modalWorksContainer && modalWorksContainer.offsetParent !== null) {
         loadWorksInModal();
     }
+
 }
 
 // Initialiser les événements de la modale
