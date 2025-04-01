@@ -572,6 +572,7 @@ async function loadCategories() {
     try {
         const response = await fetch("http://localhost:5678/api/categories");
         if (!response.ok) {
+             // lancer une erreur en cas d'échec du chargement des catégories
             throw new Error("Erreur lors du chargement des catégories");
         }
         // Attend que la réponse HTTP soit convertie en JSON et stocke les données dans la variable "categories".
@@ -594,6 +595,7 @@ async function loadCategories() {
             option.textContent = category.name;
             categorySelect.appendChild(option);
         });
+         // Capture et affiche les erreurs dans la console
     } catch (error) {
         console.error("Erreur:", error);
     }
