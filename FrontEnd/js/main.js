@@ -72,7 +72,7 @@ window.onload = function () {
         }
     });
 };
-
+// fonction asynchrone qui prend en paramètre un tableau "works".
 async function generateCategoriesMenu(works) {
     if (!works || works.length === 0) return;
     if (!categoriesContainer) {
@@ -99,7 +99,6 @@ async function generateCategoriesMenu(works) {
         }
     });
 
-    
     // Convertir le Set en Array pour pouvoir itérer dessus
     Array.from(uniqueCategories).forEach(category => {
         const button = document.createElement("button");
@@ -109,7 +108,6 @@ async function generateCategoriesMenu(works) {
         categoriesContainer.appendChild(button);
     });
 }
-
 
 //Fonction modifiée pour filtrer correctement par visibilité
 function handleCategoryClick(event, category, works) {
@@ -139,8 +137,6 @@ function handleCategoryClick(event, category, works) {
     });
 
 }
-
-
 
 // Fonction pour afficher les travaux - avec correction pour l'attribut dataset.category
 function displayWorks(works) {
@@ -174,8 +170,6 @@ function displayWorks(works) {
     });
 }
 
-
-
 /// Initialisation principale - modifiée pour appeler l'API une seule fois
 async function init() {
     if (isInitialized) {
@@ -201,9 +195,6 @@ async function init() {
     initModalEvents();
 }
 
-
-
-
 // Fonction de rafraîchissement des travaux sans réinitialiser toute l'interface
 async function refreshWorks() {
     console.log("Rafraîchissement des travaux");
@@ -214,8 +205,6 @@ async function refreshWorks() {
       
     // Réafficher tous les travaux  
     displayWorks(allGallery);
-
-
     
     /// Réappliquer le filtre actif
     const allWorkElements = worksContainer.querySelectorAll("figure");
@@ -336,16 +325,18 @@ function setupModalNavigation(elements) {
     }
 }
 
-// Configuration de la prévisualisation d'image
+// fonction qui prend en paramètre un objet contenant plusieurs éléments HTML.  
 function setupImagePreview(elements) {
     const { fileUpload, imagePreview, fileLabel, uploadInfo } = elements;
     
     if (!fileUpload || !imagePreview) return;
-    
+    // Ajoute un écouteur d'événement pour détecter un changement dans l'élément d'upload de fichier.   
     fileUpload.addEventListener("change", function() {
         const file = this.files[0];
         if (file) {
+
             const reader = new FileReader();
+             // Définit une fonction qui s'exécutera lorsque le fichier sera entièrement chargé.  
             reader.onload = function(e) {
                 imagePreview.src = e.target.result;
                 imagePreview.style.display = "block";
@@ -554,43 +545,49 @@ async function loadWorksInModal() {
         console.error("Le conteneur des travaux dans la modale est introuvable.");
         return;
     }
-
+// Vide le contenu de "modalWorksContainer" pour s'assurer qu'il n'y ait pas de doublons avant d'ajouter de nouveaux éléments.
     modalWorksContainer.innerHTML = "";
-
+// Parcourt chaque élément du tableau "works".
     works.forEach(work => {
+        // Crée un élément <div> pour représenter un élément de la galerie.
         const galleryItem = document.createElement("div");
+        // Ajoute une classe "gallery-item" à cet élément <div> pour le styliser avec CSS.
         galleryItem.className = "gallery-item";
+        // Ajoute un attribut "data-id" contenant l'identifiant du work,
         galleryItem.dataset.id = work.id;
-
+        // Définit le contenu HTML de l'élément "galleryItem", qui inclut une image et une icône de suppression.
         galleryItem.innerHTML = `
             <img src="${work.imageUrl}" alt="${work.title}">
             <div class="delete-icon">
                 <i class="fa-solid fa-trash-can"></i>
             </div>
         `;
-
+    // Ajoute cet élément "galleryItem" au conteneur modalWorksContainer, affichant ainsi l'image dans la galerie modale.
         modalWorksContainer.appendChild(galleryItem);
     });
 }
 
-// Fonction pour charger les catégories dans le formulaire
+    // Fonction pour charger les catégories dans le formulaire
 async function loadCategories() {
     try {
         const response = await fetch("http://localhost:5678/api/categories");
         if (!response.ok) {
             throw new Error("Erreur lors du chargement des catégories");
         }
-
+        // Attend que la réponse HTTP soit convertie en JSON et stocke les données dans la variable "categories".
         const categories = await response.json();
+        // Récupère l'élément HTML ayant l'ID "category"
         const categorySelect = document.getElementById("category");
 
+        // Vérifie si l'élément "categorySelect" existe bien dans le DOM.   
         if (!categorySelect) {
             console.error("Le sélecteur de catégories est introuvable.");
             return;
         }
-
+        // Initialise le contenu de "categorySelect" avec une option par défaut désactivée et sélectionnée.
         categorySelect.innerHTML = '<option value="" disabled selected>Sélectionner une catégorie</option>';
 
+        // Parcourt chaque élément du tableau "categories" (qui contient les catégories récupérées depuis l'API). 
         categories.forEach(category => {
             const option = document.createElement("option");
             option.value = category.id;
@@ -602,7 +599,7 @@ async function loadCategories() {
     }
 }
 
-// Fonction pour supprimer une œuvre
+// Fonction pour supprimer une image
 async function deleteWork(workId) {
     const token = localStorage.getItem("Token");
     if (!token) {
@@ -627,7 +624,7 @@ async function deleteWork(workId) {
             refreshWorks();
 
             // Confirmation à l'utilisateur
-            alert("Œuvre supprimée avec succès !");
+            alert("image supprimée avec succès !");
         } catch (error) {
             console.error("Erreur:", error);
             alert("Une erreur est survenue lors de la suppression.");
