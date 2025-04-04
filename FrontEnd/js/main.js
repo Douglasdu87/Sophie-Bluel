@@ -138,7 +138,7 @@ function handleCategoryClick(event, category, works) {
 
 }
 
-// Fonction pour afficher les travaux - avec correction pour l'attribut dataset.category
+// Création de la onction pour afficher les travaux dans la galerie
 function displayWorks(works) {
     if (!worksContainer) {
         console.error("Le conteneur de la galerie est introuvable.");
@@ -159,7 +159,7 @@ function displayWorks(works) {
         } else {
             workElement.dataset.category = "";
         }
-        
+        // Injecte du contenu HTML dans l'élément `workElement
         workElement.innerHTML = `
             <img src="${work.imageUrl}" alt="${work.title}">
             <h3>${work.title}</h3>
@@ -174,11 +174,10 @@ function displayWorks(works) {
 async function init() {
     if (isInitialized) {
         console.log("Initialisation déjà effectuée, actualisation uniquement");
-        refreshWorks();
+
         return;
     }
 
-    
     isInitialized = true;
     console.log("Initialisation complète");
     
@@ -195,7 +194,7 @@ async function init() {
     initModalEvents();
 }
 
-// Fonction de rafraîchissement des travaux sans réinitialiser toute l'interface
+// Création de la fonction de rafraîchissement des travaux sans réinitialiser toute l'interface
 async function refreshWorks() {
     console.log("Rafraîchissement des travaux");
     const allGallery = await getWork();
@@ -204,7 +203,7 @@ async function refreshWorks() {
     const activeCategory = document.querySelector(".filter.active")?.textContent || "Tous";
       
     // Réafficher tous les travaux  
-    displayWorks(allGallery);
+     displayWorks(allGallery);
     
     /// Réappliquer le filtre actif
     const allWorkElements = worksContainer.querySelectorAll("figure");
@@ -463,12 +462,6 @@ function setupDeleteHandlers(elements) {
         });
     }
     
-    // Confirmer la suppression de la galerie
-    if (confirmDeleteButton) {
-        confirmDeleteButton.addEventListener("click", function() {
-            deleteAllWorks();
-        });
-    }
 }
 
 // Gestionnaire de clic pour la suppression (défini séparément pour pouvoir le supprimer)
@@ -485,11 +478,6 @@ function handleDeleteClick(event) {
     }
 }
 
-// Fonction pour supprimer toutes les œuvres
-function deleteAllWorks() {
-    alert("Fonctionnalité de suppression globale non implémentée");
-    // Cette fonction devrait être implémentée si nécessaire
-}
 
 // Afficher la vue galerie
 function showGalleryView(elements) {
