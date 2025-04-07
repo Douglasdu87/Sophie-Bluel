@@ -506,3 +506,11 @@ footer nav ul {
 	margin-right: 5px;
 
   }
+/* Ajouter ces classes à la fin du fichier CSS */
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}

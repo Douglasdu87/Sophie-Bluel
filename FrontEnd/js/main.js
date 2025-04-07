@@ -126,14 +126,18 @@ function handleCategoryClick(event, category, works) {
         
         if (category === "Tous") {
             // Si "Tous" est sélectionné, afficher tous les éléments
-            element.style.display = "block";
+            element.classList.add("visible");
+            element.classList.remove("hidden");
         } else if (elementCategory === category) {
             // Si la catégorie correspond, afficher l'élément
-            element.style.display = "block";
+            element.classList.add("visible");
+            element.classList.remove("hidden");
         } else {
             // Sinon, masquer l'élément
-            element.style.display = "none";
+            element.classList.add("hidden");
+            element.classList.remove("visible");
         }
+        
     });
 
 }
@@ -209,12 +213,14 @@ async function refreshWorks() {
     const allWorkElements = worksContainer.querySelectorAll("figure");
     allWorkElements.forEach(element => {
         if (activeCategory === "Tous" || element.dataset.category === activeCategory) {
-            element.style.display = "block";
+            element.classList.add("visible");
+            element.classList.remove("hidden");
         } else {
-            element.style.display = "none";
+            element.classList.add("hidden");
+            element.classList.remove("visible");
         }
     });
-
+    
     // Si on est dans la modale, rafraîchir aussi l'affichage de la modale
     const modalWorksContainer = document.getElementById("modal-works-container");
     if (modalWorksContainer && modalWorksContainer.offsetParent !== null) {
@@ -393,7 +399,7 @@ function submitPhotoForm(elements) {
         return;
     }
     
-    const token = localStorage.getItem("Token");
+        const token = localStorage.getItem("Token");
     if (!token) {
         alert("Vous devez être connecté pour ajouter une photo.");
         return;
@@ -426,14 +432,18 @@ function submitPhotoForm(elements) {
     })
     .then(data => {
         // Réinitialiser le formulaire
+        console.log(data);
         addPhotoForm.reset();
         resetPreview(elements);
         
-        // Revenir à la vue galerie et recharger
+        // Revenir à la vue galerie
         showGalleryView(elements);
         
-        // Rafraîchir uniquement les travaux, pas toute l'interface
-        refreshWorks();
+        // Au lieu de refreshWorks(), ajouter directement le nouveau travail
+        addWorkToDOM(data);
+        
+        // Ajouter également à la modale
+        addWorkToModal(data);
         
         // Confirmation à l'utilisateur
         alert("Photo ajoutée avec succès !");
@@ -442,6 +452,64 @@ function submitPhotoForm(elements) {
         console.error("Erreur:", error);
         alert("Une erreur est survenue lors de l'ajout de la photo.");
     });
+}
+
+// Nouvelle fonction pour ajouter un travail au DOM principal
+function addWorkToDOM(work) {
+    if (!worksContainer) return;
+    
+    const workElement = document.createElement("figure");
+    workElement.dataset.id = work.id;
+    
+    if (work.category && work.category.name) {
+        workElement.dataset.category = work.category.name;
+    } else {
+        // Récupérer le nom de la catégorie à partir de l'ID
+        const categorySelect = document.getElementById("category");
+        if (categorySelect) {
+            const option = categorySelect.querySelector(`option[value="${work.categoryId}"]`);
+            if (option) {
+                workElement.dataset.category = option.textContent;
+            } else {
+                workElement.dataset.category = "";
+            }
+        } else {
+            workElement.dataset.category = "";
+        }
+    }
+    
+    workElement.innerHTML = `
+        <img src="${work.imageUrl}" alt="${work.title}">
+        <h3>${work.title}</h3>
+    `;
+    
+    worksContainer.appendChild(workElement);
+    
+    // Appliquer le filtre actif si nécessaire
+    const activeCategory = document.querySelector(".filter.active")?.textContent || "Tous";
+    if (activeCategory !== "Tous" && workElement.dataset.category !== activeCategory) {
+        workElement.classList.add("hidden");
+        workElement.classList.remove("visible");
+        
+    }
+}
+
+// Nouvelle fonction pour ajouter un travail à la modale
+function addWorkToModal(work) {
+    const modalWorksContainer = document.getElementById("modal-works-container");
+    if (!modalWorksContainer) return;
+    
+    const galleryItem = document.createElement("div");
+    galleryItem.className = "gallery-item";
+    galleryItem.dataset.id = work.id;
+    galleryItem.innerHTML = `
+        <img src="${work.imageUrl}" alt="${work.title}">
+        <div class="delete-icon">
+            <i class="fa-solid fa-trash-can"></i>
+        </div>
+    `;
+    
+    modalWorksContainer.appendChild(galleryItem);
 }
 
 // Configurer les gestionnaires d'événements de suppression
@@ -555,7 +623,7 @@ async function loadWorksInModal() {
     });
 }
 
-    // Fonction pour charger les catégories dans le formulaire
+// Fonction pour charger les catégories dans le formulaire
 async function loadCategories() {
     try {
         const response = await fetch("http://localhost:5678/api/categories");
@@ -610,14 +678,32 @@ async function deleteWork(workId) {
                 throw new Error("Erreur lors de la suppression");
             }
 
-            // Rafraîchir uniquement les travaux, pas toute l'interface
-            refreshWorks();
-
+            // Au lieu de refreshWorks(), supprimer directement les éléments du DOM
+            removeWorkFromDOM(workId);
+            
             // Confirmation à l'utilisateur
-            alert("image supprimée avec succès !");
+            alert("Image supprimée avec succès !");
         } catch (error) {
             console.error("Erreur:", error);
             alert("Une erreur est survenue lors de la suppression.");
+        }
+    }
+}
+
+// Nouvelle fonction pour supprimer un travail du DOM
+function removeWorkFromDOM(workId) {
+    // Supprimer de la galerie principale
+    const workElement = worksContainer.querySelector(`figure[data-id="${workId}"]`);
+    if (workElement) {
+        workElement.remove();
+    }
+    
+    // Supprimer de la modale
+    const modalWorksContainer = document.getElementById("modal-works-container");
+    if (modalWorksContainer) {
+        const modalWorkElement = modalWorksContainer.querySelector(`.gallery-item[data-id="${workId}"]`);
+        if (modalWorkElement) {
+            modalWorkElement.remove();
         }
     }
 }
