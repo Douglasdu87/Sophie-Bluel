@@ -72,6 +72,7 @@ window.onload = function () {
         }
     });
 };
+
 // fonction asynchrone qui prend en paramètre un tableau "works".
 async function generateCategoriesMenu(works) {
     if (!works || works.length === 0) return;
@@ -142,7 +143,7 @@ function handleCategoryClick(event, category, works) {
 
 }
 
-// Création de la onction pour afficher les travaux dans la galerie
+// Création de la fonction pour afficher les travaux dans la galerie
 function displayWorks(works) {
     if (!worksContainer) {
         console.error("Le conteneur de la galerie est introuvable.");
@@ -178,7 +179,6 @@ function displayWorks(works) {
 async function init() {
     if (isInitialized) {
         console.log("Initialisation déjà effectuée, actualisation uniquement");
-
         return;
     }
 
@@ -226,7 +226,6 @@ async function refreshWorks() {
     if (modalWorksContainer && modalWorksContainer.offsetParent !== null) {
         loadWorksInModal();
     }
-
 }
 
 // Initialiser les événements de la modale
@@ -297,14 +296,13 @@ function setupModalNavigation(elements) {
     }
     
     // Retour à la galerie depuis l'ajout de photo
-    if (flecheGauche && galleryView && addPhotoView) {
-        flecheGauche.addEventListener("click", function() {
+    if  (flecheGauche && galleryView && addPhotoView) {
+            flecheGauche.addEventListener("click", function() {
             addPhotoView.style.display = "none";
             galleryView.style.display = "flex";
             galleryView.style.flexDirection = "column";
-        flecheGauche.style.display = "none";
+            flecheGauche.style.display = "none";
         });
-
     }
     
     // Fermer la modale
@@ -330,15 +328,106 @@ function setupModalNavigation(elements) {
     }
 }
 
+// Fonction pour afficher le popup d'erreur
+function showErrorPopup(message) {
+    // Créer le popup s'il n'existe pas
+    let errorPopup = document.getElementById('error-popup');
+    if (!errorPopup) {
+        errorPopup = document.createElement('div');
+        errorPopup.id = 'error-popup';
+        errorPopup.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        `;
+        
+        const popupContent = document.createElement('div');
+        popupContent.style.cssText = `
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        `;
+        
+        const messageElement = document.createElement('p');
+        messageElement.style.cssText = `
+            margin: 0 0 15px 0;
+            color: #d63031;
+            font-weight: bold;
+        `;
+        messageElement.textContent = message;
+        
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'OK';
+        closeButton.style.cssText = `
+            background: #1D6154;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        `;
+        
+        closeButton.addEventListener('click', function() {
+            errorPopup.style.display = 'none';
+        });
+        
+        popupContent.appendChild(messageElement);
+        popupContent.appendChild(closeButton);
+        errorPopup.appendChild(popupContent);
+        document.body.appendChild(errorPopup);
+        
+        // Fermer en cliquant en dehors
+        errorPopup.addEventListener('click', function(event) {
+            if (event.target === errorPopup) {
+                errorPopup.style.display = 'none';
+            }
+        });
+    } else {
+        // Mettre à jour le message si le popup existe déjà
+        const messageElement = errorPopup.querySelector('p');
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+    }
+    
+    // Afficher le popup
+    errorPopup.style.display = 'flex';
+}
+    
 // fonction qui prend en paramètre un objet contenant plusieurs éléments HTML.  
 function setupImagePreview(elements) {
-    const { fileUpload, imagePreview, fileLabel, uploadInfo } = elements;
+    const { fileUpload, imagePreview, fileLabel, uploadInfo, validateBtn } = elements;
     
     if (!fileUpload || !imagePreview) return;
     // Ajoute un écouteur d'événement pour détecter un changement dans l'élément d'upload de fichier.   
     fileUpload.addEventListener("change", function() {
         const file = this.files[0];
         if (file) {
+            // Vérification de la taille de l'image (4Mo maximum)
+            if (file.size > 4 * 1024 * 1024) { // 4 Mo
+                // Afficher le popup d'erreur
+                showErrorPopup('Erreur : La taille de l\'image ne doit pas dépasser 4 Mo.');
+                // Réinitialiser le champ de fichier
+                this.value = '';
+                // Désactiver le bouton de validation
+                if (validateBtn) {
+                    validateBtn.disabled = true;
+                }
+                return;
+            } else {
+                // Si la taille est correcte, réactiver le bouton de validation si les autres champs sont remplis
+                validateForm(elements);
+            }
 
             const reader = new FileReader();
              // Définit une fonction qui s'exécutera lorsque le fichier sera entièrement chargé.  
@@ -349,6 +438,9 @@ function setupImagePreview(elements) {
                 if (uploadInfo) uploadInfo.style.display = "none";
             };
             reader.readAsDataURL(file);
+            
+            // Log des informations du fichier
+            console.log('Fichier sélectionné :', file.name, file.type, (file.size / (1024 * 1024)).toFixed(2), 'Mo');
         }
     });
 }
@@ -384,10 +476,16 @@ function validateForm(elements) {
     const hasTitle = title.value.trim() !== "";
     const hasCategory = category.value !== "";
     
-    // Activer ou désactiver le bouton selon la validité
-    validateBtn.disabled = !(hasFile && hasTitle && hasCategory);
+    // Vérifier aussi que le fichier respecte la limite de taille
+    let validFileSize = true;
+    if (hasFile && fileUpload.files[0].size > 4 * 1024 * 1024) {
+        validFileSize = false;
+    }
     
-    return hasFile && hasTitle && hasCategory;
+    // Activer ou désactiver le bouton selon la validité
+    validateBtn.disabled = !(hasFile && hasTitle && hasCategory && validFileSize);
+    
+    return hasFile && hasTitle && hasCategory && validFileSize;
 }
 
 // Fonction pour soumettre le formulaire d'ajout de photo
@@ -399,7 +497,7 @@ function submitPhotoForm(elements) {
         return;
     }
     
-        const token = localStorage.getItem("Token");
+    const token = localStorage.getItem("Token");
     if (!token) {
         alert("Vous devez être connecté pour ajouter une photo.");
         return;
@@ -407,7 +505,22 @@ function submitPhotoForm(elements) {
     
     // Vérifier si le formulaire est valide
     if (!validateForm(elements)) {
-        alert("Veuillez remplir tous les champs obligatoires.");
+        if (!title.value.trim()) {
+            alert('Veuillez entrer un titre.');
+            return;
+        }
+        if (!category.value) {
+            alert('Veuillez sélectionner une catégorie.');
+            return;
+        }
+        if (!fileUpload.files.length) {
+            alert('Veuillez sélectionner une image.');
+            return;
+        }
+        if (fileUpload.files[0].size > 4 * 1024 * 1024) {
+            showErrorPopup('Erreur : La taille de l\'image ne doit pas dépasser 4 Mo.');
+            return;
+        }
         return;
     }
     
@@ -415,6 +528,13 @@ function submitPhotoForm(elements) {
     formData.append("image", fileUpload.files[0]);
     formData.append("title", title.value);
     formData.append("category", category.value);
+
+    // Log des données validées
+    console.log('Données validées :', {
+        title: title.value,
+        category: category.value,
+        file: fileUpload.files[0]
+    });
 
     // Envoyer les données à l'API
     fetch(API_WORK, {
@@ -490,7 +610,6 @@ function addWorkToDOM(work) {
     if (activeCategory !== "Tous" && workElement.dataset.category !== activeCategory) {
         workElement.classList.add("hidden");
         workElement.classList.remove("visible");
-        
     }
 }
 
@@ -529,7 +648,6 @@ function setupDeleteHandlers(elements) {
             galleryView.style.display = "block";
         });
     }
-    
 }
 
 // Gestionnaire de clic pour la suppression (défini séparément pour pouvoir le supprimer)
@@ -546,8 +664,7 @@ function handleDeleteClick(event) {
     }
 }
 
-
-// Afficher la vue galerie
+        // Afficher la vue galerie
 function showGalleryView(elements) {
     const { galleryView, addPhotoView, confirmDeleteView } = elements;
     
@@ -567,6 +684,7 @@ function showAddPhotoView(elements) {
     if (galleryView) galleryView.style.display = "none";
     addPhotoView.style.display = "block";
     if (confirmDeleteView) confirmDeleteView.style.display = "none";
+    
     resetPreview(elements);
 }
 
@@ -589,6 +707,7 @@ function closeModal(elements) {
     
     modal.style.display = "none";
     if (addPhotoForm) addPhotoForm.reset();
+    
     resetPreview(elements);
 }
 
@@ -601,9 +720,9 @@ async function loadWorksInModal() {
         console.error("Le conteneur des travaux dans la modale est introuvable.");
         return;
     }
-// Vide le contenu de "modalWorksContainer" pour s'assurer qu'il n'y ait pas de doublons avant d'ajouter de nouveaux éléments.
+    // Vide le contenu de "modalWorksContainer" pour s'assurer qu'il n'y ait pas de doublons avant d'ajouter de nouveaux éléments.
     modalWorksContainer.innerHTML = "";
-// Parcourt chaque élément du tableau "works".
+    // Parcourt chaque élément du tableau "works".
     works.forEach(work => {
         // Crée un élément <div> pour représenter un élément de la galerie.
         const galleryItem = document.createElement("div");
@@ -618,7 +737,7 @@ async function loadWorksInModal() {
                 <i class="fa-solid fa-trash-can"></i>
             </div>
         `;
-    // Ajoute cet élément "galleryItem" au conteneur modalWorksContainer, affichant ainsi l'image dans la galerie modale.
+        // Ajoute cet élément "galleryItem" au conteneur modalWorksContainer, affichant ainsi l'image dans la galerie modale.
         modalWorksContainer.appendChild(galleryItem);
     });
 }
@@ -656,6 +775,8 @@ async function loadCategories() {
         console.error("Erreur:", error);
     }
 }
+
+
 
 // Fonction pour supprimer une image
 async function deleteWork(workId) {
