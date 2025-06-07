@@ -403,7 +403,8 @@ function showErrorPopup(message) {
     // Afficher le popup
     errorPopup.style.display = 'flex';
 }
-    
+
+
 // fonction qui prend en paramètre un objet contenant plusieurs éléments HTML.  
 function setupImagePreview(elements) {
     const { fileUpload, imagePreview, fileLabel, uploadInfo, validateBtn } = elements;
@@ -444,6 +445,7 @@ function setupImagePreview(elements) {
         }
     });
 }
+
 
 // Configuration du formulaire d'ajout de photo
 function setupPhotoForm(elements) {
@@ -612,7 +614,6 @@ function addWorkToDOM(work) {
         workElement.classList.remove("visible");
     }
 }
-
 // Nouvelle fonction pour ajouter un travail à la modale
 function addWorkToModal(work) {
     const modalWorksContainer = document.getElementById("modal-works-container");
@@ -775,8 +776,6 @@ async function loadCategories() {
         console.error("Erreur:", error);
     }
 }
-
-
 
 // Fonction pour supprimer une image
 async function deleteWork(workId) {
